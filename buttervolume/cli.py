@@ -8,6 +8,7 @@ import signal
 from requests.exceptions import ConnectionError
 import sys
 import urllib
+import traceback
 from bottle import app
 from buttervolume.plugin import SCHEDULE
 from buttervolume.plugin import VOLUMES_PATH, SNAPSHOTS_PATH
@@ -18,6 +19,7 @@ from threading import Timer
 from waitress import serve
 from webtest import TestApp
 
+TRACE_CONNECTION = True
 
 logging.basicConfig(level=LOGLEVEL)
 log = logging.getLogger()
@@ -37,6 +39,8 @@ class Session(object):
         except ConnectionError:
             log.error('Failed to connect to Buttervolume. '
                       'You can start it with: buttervolume run')
+            if TRACE_CONNECTION:
+                traceback.print_exc()
             return
 
     def get(self, *a, **kw):
@@ -45,6 +49,8 @@ class Session(object):
         except ConnectionError:
             log.error('Failed to connect to Buttervolume. '
                       'You can start it with: buttervolume run')
+            if TRACE_CONNECTION:
+                traceback.print_exc()
 
 
 def get_from(resp, key):
