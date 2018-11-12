@@ -1,0 +1,32 @@
+# ./rebuild_rootfs_ci.sh
+# docker plugin create pyseed/buttervolume
+# docker plugin ls
+# docker plugin push pyseed/buttervolume
+FROM debian:stretch
+MAINTAINER Christophe Combelles. <ccomb@anybox.fr>
+
+RUN set -x; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        btrfs-progs \
+        curl \
+        ca-certificates \
+        git \
+        python3-setuptools \
+        ssh \
+        unzip \
+        rsync \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /run/docker/plugins \
+    && mkdir -p /var/lib/buttervolume/{volumes,snapshots} \
+    && mkdir /etc/buttervolume /root/.ssh
+
+RUN git clone https://github.com/pyseed/buttervolume.git -b ci \
+    && cd buttervolume \
+    && python3 setup.py install \
+    && cd .. \
+    && rm -rf buttervolume
+
+COPY entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["run"]
